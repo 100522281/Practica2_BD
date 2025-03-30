@@ -57,6 +57,7 @@ BEGIN
     WHERE USER_ID = :NEW.USER_ID;
     
     -- Verificar si el usuario es institucional (biblioteca municipal)
+    -- 'L' es el tipo de usuario para bibliotecas municipales
     IF v_user_type = 'L' THEN
         RAISE_APPLICATION_ERROR(-20001, 'Los usuarios institucionales (bibliotecas municipales) no pueden realizar publicaciones.');
     END IF;
@@ -66,3 +67,16 @@ EXCEPTION
         RAISE_APPLICATION_ERROR(-20002, 'El usuario especificado no existe en la base de datos.');
 END;
 /
+
+-- Trigger para Cuando el estado de una copia se establece como "deteriorado", la "fecha de
+-- baja" se establece automáticamente en "fecha y hora actuales". 
+
+CREATE OR REPLACE TRIGGER set_deregistered_date
+BEFORE UPDATE ON COPIES
+FOR EACH ROW
+WHEN (NEW.CONDITION = 'D' AND OLD.CONDITION != 'D')
+BEGIN
+    :NEW.DEREGISTERED := SYSDATE;
+END;
+/
+
