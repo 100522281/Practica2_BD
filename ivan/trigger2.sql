@@ -40,17 +40,13 @@ COMMIT;
 
 -- Añadimos datos básicos para las pruebas.
 
--- Insertamos un municipio (necesario para users y loans)
-INSERT INTO municipalities (TOWN, PROVINCE, POPULATION)
-VALUES ('Sotogris de San Guijuelo', 'Huelva', 1000);
-
 -- Insertamos un usuario particular (TYPE = 'P')
 INSERT INTO users (USER_ID, ID_CARD, NAME, SURNAME1, BIRTHDATE, TOWN, PROVINCE, ADDRESS, PHONE, TYPE)
-VALUES ('U0001', '12345678Z', 'Juan', 'Pérez', TO_DATE('1990-01-01', 'YYYY-MM-DD'), 'Sotogris de San Guijuelo ', 'Huelva', 'Calle Falsa 123', 600123456, 'P');
+VALUES ('U0001', '12345678Z', 'Juan', 'Pérez', TO_DATE('1990-01-01', 'YYYY-MM-DD'), 'Sotogris de San Guijuelo', 'Huelva', 'Calle Falsa 123', 600123456, 'P');
 
 -- Insertamos un usuario institucional (TYPE = 'L')
 INSERT INTO users (USER_ID, ID_CARD, NAME, SURNAME1, BIRTHDATE, TOWN, PROVINCE, ADDRESS, PHONE, TYPE)
-VALUES ('U0002', '87654321X', 'Biblioteca', 'Central', TO_DATE('2000-01-01', 'YYYY-MM-DD'), 'Sotogris de San Guijuelo ', 'Huelva', 'Avenida Principal 1', 600654321, 'L');
+VALUES ('U0002', '87654321X', 'Biblioteca', 'Central', TO_DATE('2000-01-01', 'YYYY-MM-DD'), 'Sotogris de San Guijuelo', 'Huelva', 'Avenida Principal 1', 600654321, 'L');
 
 -- Insertamos una copia de un libro
 INSERT INTO copies (SIGNATURE, ISBN)

@@ -49,10 +49,10 @@ SELECT SIGNATURE, CONDITION, DEREGISTERED FROM Copies WHERE SIGNATURE = 'C0001';
 
 
 -- Prueba 3: Cambiar CONDITION a 'W' y verificar que DEREGISTERED no se actualiza
-UPDATE Copies SET CONDITION = 'W' WHERE SIGNATURE = 'C0001';
+UPDATE Copies SET CONDITION = 'W' WHERE SIGNATURE = 'C0002';
 -- Verificamos resultado
-SELECT SIGNATURE, CONDITION, DEREGISTERED FROM Copies WHERE SIGNATURE = 'C0001';
--- Resultado esperado: 'C0001' con CONDITION = 'W' y DEREGISTERED sin cambios (no se actualiza).
+SELECT SIGNATURE, CONDITION, DEREGISTERED FROM Copies WHERE SIGNATURE = 'C0002';
+-- Resultado esperado: 'C0002' con CONDITION = 'W' y DEREGISTERED sin cambios (no se actualiza).
 
 
 
