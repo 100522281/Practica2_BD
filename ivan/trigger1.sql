@@ -1,5 +1,6 @@
 
-
+-- Añadir columna LECTURAS a la tabla BOOKS
+ALTER TABLE BOOKS ADD (LECTURAS NUMBER DEFAULT 0);
 
 -- Trigger 
 -- Trigger para Añadir una columna "número de lecturas" (lecturas) a la tabla ‘Libros’. Cuando
@@ -32,181 +33,59 @@ END;
 /
 
 
--- TESTS 3
+-- TESTS 1
+
+-- Consultas para saber que datos vamos a utilizar
+select user_id from loans where rownum <= 4;
+
+select signature from loans where user_id = '9994309633';
+
+select * from loans where user_id = '9994309633' and signature = 'NA009';
+-- SIGNA = NA009  USER_ID = 9994309633  STOPDATE = 23-NOV-24
+-- TOWN = Valvacas  PROVINCE = Cádiz  T = L    TIME = 680 
+-- RETURN  = 07-DEC-24
 
 
--- Añadir columna LECTURAS a la tabla BOOKS
-ALTER TABLE BOOKS ADD (LECTURAS NUMBER DEFAULT 0);
+select isbn from copies where signature = 'NA009';
 
+select title,author from editions where isbn = '84-85707-12-5';
 
--- Hecho por Grok
-
--- Limpiar datos previos para las pruebas
-DELETE FROM LOANS;
-DELETE FROM COPIES;
-DELETE FROM EDITIONS;
-DELETE FROM BOOKS;
-DELETE FROM USERS;
-DELETE FROM MUNICIPALITIES;
-DELETE FROM SERVICES;
-COMMIT;
-
-
-
--- Insertar datos básicos para las pruebas
--- Municipio y servicio (necesario para LOANS)
-INSERT INTO MUNICIPALITIES (TOWN, PROVINCE, POPULATION)
-VALUES ('Sotogris de San Guijuelo', 'Huelva', 1000);
-
-INSERT INTO SERVICES (TOWN, PROVINCE, BUS, TASKDATE, PASSPORT)
-VALUES ('Sotogris de San Guijuelo', 'Huelva', 'BUS001', TO_DATE('2025-03-31', 'YYYY-MM-DD'), 'PASSPORT1');
-
--- Libro
-INSERT INTO BOOKS (TITLE, AUTHOR, COUNTRY, LANGUAGE, PUB_DATE)
-VALUES ('El Quijote', 'Miguel de Cervantes', 'España', 'Spanish', 1605);
-
--- Edición
-INSERT INTO EDITIONS (ISBN, TITLE, AUTHOR, LANGUAGE, NATIONAL_LIB_ID)
-VALUES ('978-84-220-1887-2', 'El Quijote', 'Miguel de Cervantes', 'Spanish', 'NATLIB001');
-
--- Copias
-INSERT INTO COPIES (SIGNATURE, ISBN, CONDITION)
-VALUES ('C0001', '978-84-220-1887-2', 'G');
-
-INSERT INTO COPIES (SIGNATURE, ISBN, CONDITION)
-VALUES ('C0002', '978-84-220-1887-2', 'G');
-
--- Usuario
-INSERT INTO USERS (USER_ID, ID_CARD, NAME, SURNAME1, BIRTHDATE, TOWN, PROVINCE, ADDRESS, PHONE, TYPE)
-VALUES ('U0001', '12345678Z', 'Ana', 'García', TO_DATE('1990-01-01', 'YYYY-MM-DD'), 'Madrid', 'Madrid', 'Calle Falsa 123', 600123456, 'P');
-
-COMMIT;
-
--- Verificar estado inicial de LECTURAS
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'El Quijote' AND AUTHOR = 'Miguel de Cervantes';
--- Resultado esperado: LECTURAS = 0
+select * from books where title = 'Cuentos de fin de aÃ±o' and author = 'GÃ³mez de la Serna, RamÃ³n, ( 1888-1963)';
 
 
 
--- Prueba 1: Insertar un préstamo con copia válida
-INSERT INTO LOANS (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE, TIME)
-VALUES ('C0001', 'U0001', TO_DATE('2025-03-31', 'YYYY-MM-DD'), 'Madrid', 'Madrid', 'L', 0);
--- Verificar resultado
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'El Quijote' AND AUTHOR = 'Miguel de Cervantes';
--- Resultado esperado: LECTURAS = 1
-
-
-
--- Prueba 2: Insertar un préstamo con copia inexistente
-INSERT INTO LOANS (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE, TIME)
-VALUES ('C9999', 'U0001', TO_DATE('2025-03-31', 'YYYY-MM-DD'), 'Madrid', 'Madrid', 'L', 0);
--- Verificar resultado
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'El Quijote' AND AUTHOR = 'Miguel de Cervantes';
--- Resultado esperado: LECTURAS = 1 (sin cambios)
-
-
-
--- Prueba 3: Insertar otro préstamo del mismo libro (misma edición, otra copia)
-INSERT INTO LOANS (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE, TIME)
-VALUES ('C0002', 'U0001', TO_DATE('2025-03-31', 'YYYY-MM-DD'), 'Madrid', 'Madrid', 'L', 0);
--- Verificar resultado
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'El Quijote' AND AUTHOR = 'Miguel de Cervantes';
--- Resultado esperado: LECTURAS = 2
-
-COMMIT;
-
-
-
-
-
-
--- Hecho por Deepseek
-
--- Preparar datos de prueba
--- Limpiar registros previos
+-- Deleteamos posts
 DELETE FROM posts;
-DELETE FROM loans;
-DELETE FROM copies;
-DELETE FROM editions;
-DELETE FROM books;
-DELETE FROM users;
-COMMIT;
 
--- Insertar un municipio (requerido para users y loans)
-INSERT INTO municipalities (TOWN, PROVINCE, POPULATION)
-VALUES ('Madrid', 'Huelva', 3200000);
 
--- Insertar un usuario
-INSERT INTO users (USER_ID, ID_CARD, NAME, SURNAME1, BIRTHDATE, TOWN, PROVINCE, ADDRESS, PHONE, TYPE)
-VALUES ('U001', '12345678A', 'Ana', 'García', TO_DATE('1995-05-15', 'YYYY-MM-DD'), 'Madrid', 'Huelva', 'Calle Mayor 5', 600112233, 'P');
+-- PRUEBA 1. Eliminamos la insercion de loans, la volvemos a insertar y vemos si ha cambiado lecturas
+--
+-- Vemos lecturas en el libro de la prueba (deberia ser un cero)
+SELECT lecturas FROM books  where title = 'Cuentos de fin de aÃ±o' and author = 'GÃ³mez de la Serna, RamÃ³n, ( 1888-1963)';
+--
+-- Eliminamos la fila de loans relacionada con la prueba 
+DELETE FROM loans where user_id = '9994309633' and signature = 'NA009';
+--
+INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE, TIME, RETURN)
+VALUES ('NA009', '9994309633', TO_DATE('2024-11-23', 'YYYY-MM-DD'),'Valvacas', 'Cádiz', 'L', 680, TO_DATE('2024-12-07', 'YYYY-MM-DD'));
+--
+-- Consultamos de nuevo el libro (deberia salir un 1)
+SELECT lecturas FROM books  where title = 'Cuentos de fin de aÃ±o' and author = 'GÃ³mez de la Serna, RamÃ³n, ( 1888-1963)';
 
--- Insertar un libro en BOOKS
-INSERT INTO books (TITLE, AUTHOR, COUNTRY, LANGUAGE, PUB_DATE)
-VALUES ('Cien años de soledad', 'Gabriel García Márquez', 'Colombia', 'Español', 1967);
 
--- Insertar una edición en EDITIONS
-INSERT INTO editions (ISBN, TITLE, AUTHOR, NATIONAL_LIB_ID)
-VALUES ('978-1234-5678', 'Cien años de soledad', 'Gabriel García Márquez', 'LIB-001');
 
--- Insertar una copia en COPIES
-INSERT INTO copies (SIGNATURE, ISBN, CONDITION)
-VALUES ('C001', '978-1234-5678', 'G');
+-- PRUEBA 2. Insercion de un prestamo no valido para ver que no actualiza el valor cuando no debe
+--
+-- Vemos lecturas en el libro de la prueba para ver que valor tiene
+SELECT lecturas FROM books  where title = 'Cuentos de fin de aÃ±o' and author = 'GÃ³mez de la Serna, RamÃ³n, ( 1888-1963)';
+--
+-- Eliminamos la fila de loans relacionada con la prueba 
+DELETE FROM loans where user_id = '9994309633' and signature = 'NA009';
+-- 
+-- Insertamos un loan no valido (no deberia realizarse la insercion)
+INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE, TIME, RETURN)
+VALUES ('c930a', '9994309633', TO_DATE('2024-11-23', 'YYYY-MM-DD'),'Valvacas', 'Cádiz', 'L', 680, TO_DATE('2024-12-07', 'YYYY-MM-DD'));
+--
+-- Consultamos de nuevo el libro (deberia salir el mismo numero)
+SELECT lecturas FROM books  where title = 'Cuentos de fin de aÃ±o' and author = 'GÃ³mez de la Serna, RamÃ³n, ( 1888-1963)';
 
-COMMIT;
-
--- Verificar estado inicial de LECTURAS
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'Cien años de soledad';
--- Resultado esperado: LECTURAS = 0
-
----------------------------------------
--- Prueba 1: Caso normal
----------------------------------------
--- Insertar un préstamo válido
-INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE)
-VALUES ('C001', 'U001', SYSDATE, 'Madrid', 'Huelva', 'L');
-
-COMMIT;
-
--- Verificar LECTURAS después del préstamo
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS WHERE TITLE = 'Cien años de soledad';
--- Resultado esperado: LECTURAS = 1
-
----------------------------------------
--- Prueba 2: Copia inexistente
----------------------------------------
--- Intentar préstamo con SIGNATURE no registrada
-INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE)
-VALUES ('C999', 'U001', SYSDATE, 'Madrid', 'Huelva', 'L');
--- Error esperado: ORA-02291 (violación de FK), pero el trigger NO debe actualizar LECTURAS
-
--- Verificar LECTURAS (debe seguir siendo 1)
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS;
--- Resultado esperado: LECTURAS = 1
-
----------------------------------------
--- Prueba 3: Múltiples préstamos
----------------------------------------
--- Insertar otro préstamo con la misma copia
-INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE)
-VALUES ('C001', 'U001', SYSDATE + 1, 'Madrid', 'Huelva', 'L');
-
-COMMIT;
-
--- Verificar LECTURAS
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS;
--- Resultado esperado: LECTURAS = 2
-
----------------------------------------
--- Prueba 4: Excepción (edición no encontrada)
----------------------------------------
--- Eliminar la edición asociada a la copia (simular error)
-DELETE FROM editions WHERE ISBN = '978-1234-5678';
-COMMIT;
-
--- Insertar préstamo (debería fallar silenciosamente)
-INSERT INTO loans (SIGNATURE, USER_ID, STOPDATE, TOWN, PROVINCE, TYPE)
-VALUES ('C001', 'U001', SYSDATE + 2, 'Madrid', 'Huelva', 'L');
-
--- Verificar LECTURAS (no debe cambiar)
-SELECT TITLE, AUTHOR, LECTURAS FROM BOOKS;
--- Resultado esperado: LECTURAS = 2 (no se actualiza porque no se encontró la edición)
